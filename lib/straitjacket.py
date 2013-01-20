@@ -17,7 +17,7 @@
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-import os, ConfigParser, re, sys, exec_profiles, subprocess
+import os, ConfigParser, re, sys, exec_profiles, subprocess, string
 
 __author__ = "JT Olds"
 __copyright__ = "Copyright 2011 Instructure, Inc."
@@ -86,6 +86,15 @@ class StraitJacket(object):
               _LANG_MATCH.search(dir_) for dir_ in os.listdir(self.config_dir))
             if match))
 
+  def _get_config_languages(self):
+	availible = self._get_all_languages()
+	try:
+		configed = string.split(self.config.get('languages','enabled'))
+		c = list(set(availible) & set(configed))
+	except:
+		c = availible
+	return c
+
   def __init__(self, config_dir, log_method=None, skip_language_checks=False):
     self.log_method = log_method or stderr_log
     self.config_dir = config_dir
@@ -104,7 +113,7 @@ class StraitJacket(object):
     self.enabled_languages = {}
     self.exec_profiles = {}
 
-    languages = self._get_all_languages()
+    languages = self._get_config_languages()
 
     if not skip_language_checks:
       self.log_method("Initializing %d languages." % len(languages))
